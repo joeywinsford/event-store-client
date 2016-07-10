@@ -13,7 +13,7 @@ describe("Binary Event Metadata", function() {
         var testEventNumber = null;
         var testRunDate = new Date().toISOString();
         
-        before("Writing a test event with metadata", function(done) {
+        before("Write a test event with binary metadata", function(done) {
             var events = [{
                 eventId: EventStoreClient.Connection.createGuid(),
                 eventType: "MetadataTestEvent",
@@ -28,24 +28,27 @@ describe("Binary Event Metadata", function() {
                 done();
             });            
         });
-        it("should have metadata defined on the event", function(done) {
-            var readEvent = null;
-            var maxCount = 1;    
+
+        it("should have binary metadata on the event", function(done) {
+            var testEvent = null;
+            var readSingleEvent = 1;    
 
             var connection = new EventStoreClient.Connection({ host: defaultHostName, onError: done });
-            connection.readStreamEventsBackward(streamId, testEventNumber, maxCount, false, false, onEventAppeared, credentials, onCompleted);
+            connection.readStreamEventsBackward(streamId, testEventNumber, readSingleEvent, false, false, onEventAppeared, credentials, onCompleted);
 
-            function onEventAppeared(event) { readEvent = event; }
+            function onEventAppeared(event) { testEvent = event; }
 
             function onCompleted(completed) {
                 assert.equal(completed.result, EventStoreClient.ReadStreamResult.Success,
                     "Expected a result code of Success, not " + EventStoreClient.ReadStreamResult.getName(completed.result));
 
-                assert.ok(typeof readEvent.metadata !== "undefined", "Expected event to have metadata");
+                assert.ok(typeof testEvent.metadata !== "undefined", 
+                    "Expected event to have metadata");
 
-                assert.ok(readEvent.metadata !== null, "Expected metadata fields to have been present on the event");
+                assert.ok(testEvent.metadata !== null, 
+                    "Expected metadata fields to have been present on the event");
 
-                assert.equal(testRunDate, readEvent.metadata.toString(),
+                assert.equal(testRunDate, testEvent.metadata.toString(),
                     "Expected metadata field 'testRanAt' to match date " + testRunDate);
 
                 connection.close();
