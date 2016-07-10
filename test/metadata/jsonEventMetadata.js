@@ -14,32 +14,38 @@ describe("JSON Event Metadata", function() {
 		var testRunDate = new Date().toISOString();
 
 		before("Writing a test event with metadata", function(done) {
-			var data = { comment: "Testing reading and writing event metadata" };
-			var metadata = { testRanAt: testRunDate };
+			var events = [{
+                eventId: EventStoreClient.Connection.createGuid(),
+                eventType: "MetadataTestEvent",
+                data: { comment: "Testing reading and writing event metadata" },
+                metadata: { testRanAt: testRunDate }
+            }];
 
-			writeMetadataTestEvent(data, metadata, createOptions(done), function(connection, completed) {
-				testEventNumber = getNewEventNumber(connection, completed, done);
-			});            
+            var connection = new EventStoreClient.Connection({ host: defaultHostName, onError: done });
+            connection.writeEvents(streamId, EventStoreClient.ExpectedVersion.Any, false, events, credentials, function(completed) {
+                testEventNumber = completed.firstEventNumber;
+                connection.close();
+                done();
+            });             
 		});
 		it("should have metadata defined on the event", function(done) {
-			var readEvent = null;
-			var maxCount = 1;
-			var onEventAppeared = function (event) {
-				readEvent = event;
-			};
+			var testEvent = null;
+            var readSingleEvent = 1;    
 
-			var connection = new EventStoreClient.Connection(createOptions(done));
-			connection.readStreamEventsBackward(streamId, testEventNumber, maxCount, false, false, onEventAppeared, credentials, onCompleted);
+            var connection = new EventStoreClient.Connection({ host: defaultHostName, onError: done });
+            connection.readStreamEventsBackward(streamId, testEventNumber, readSingleEvent, false, false, onEventAppeared, credentials, onCompleted);
+
+            function onEventAppeared(event) { testEvent = event; }
 
 			function onCompleted(completed) {
 				assert.equal(completed.result, EventStoreClient.ReadStreamResult.Success,
 					"Expected a result code of Success, not " + EventStoreClient.ReadStreamResult.getName(completed.result));
 
-				assert.ok(typeof readEvent.metadata !== "undefined", "Expected event to have metadata");
+				assert.ok(typeof testEvent.metadata !== "undefined", "Expected event to have metadata");
 
-				assert.ok(readEvent.metadata !== null, "Expected metadata fields to have been present on the event");
+				assert.ok(testEvent.metadata !== null, "Expected metadata fields to have been present on the event");
 
-				assert.equal(testRunDate, readEvent.metadata.testRanAt,
+				assert.equal(testRunDate, testEvent.metadata.testRanAt,
 					"Expected metadata field 'testRanAt' to match date " + testRunDate);
 
 				connection.close();
@@ -48,30 +54,3 @@ describe("JSON Event Metadata", function() {
 		});
 	});
 });
-
-function writeMetadataTestEvent(data, metadata, options, onCompleted) {
-    var events = [{
-        eventId: EventStoreClient.Connection.createGuid(),
-        eventType: "MetadataTestEvent",
-        data: data,
-        metadata: metadata
-    }];
-
-    var connection = new EventStoreClient.Connection(options);
-    connection.writeEvents(streamId, EventStoreClient.ExpectedVersion.Any, false, events, credentials, function(completed) {
-        onCompleted(connection, completed);
-    });
-}
-
-function createOptions(done) {
-    return {
-        host: defaultHostName,
-        onError: done
-    };
-}
-
-function getNewEventNumber(connection, completed, done) {
-    connection.close();
-    done();
-    return completed.firstEventNumber;
-};
