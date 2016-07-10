@@ -25,31 +25,34 @@ describe("Binary Event Metadata", function() {
         });
         it("should have metadata defined on the event", function(done) {
             var readEvent = null;
-            var maxCount = 1;
-            var onEventAppeared = function (event) {
-                readEvent = event;
-            };
+            
+            readTestEvent(testEventNumber, createOptions(done), 
+                function(event) { readEvent = event; },
+                function (connection, completed) {
+                    assert.equal(completed.result, EventStoreClient.ReadStreamResult.Success,
+                        "Expected a result code of Success, not " + EventStoreClient.ReadStreamResult.getName(completed.result));
 
-            var connection = new EventStoreClient.Connection(createOptions(done));
-            connection.readStreamEventsBackward(streamId, testEventNumber, maxCount, false, false, onEventAppeared, credentials, onCompleted);
+                    assert.ok(typeof readEvent.metadata !== "undefined", "Expected event to have metadata");
 
-            function onCompleted(completed) {
-                assert.equal(completed.result, EventStoreClient.ReadStreamResult.Success,
-                    "Expected a result code of Success, not " + EventStoreClient.ReadStreamResult.getName(completed.result));
+                    assert.ok(readEvent.metadata !== null, "Expected metadata fields to have been present on the event");
 
-                assert.ok(typeof readEvent.metadata !== "undefined", "Expected event to have metadata");
+                    assert.equal(testRunDate, readEvent.metadata.toString(),
+                        "Expected metadata field 'testRanAt' to match date " + testRunDate);
 
-                assert.ok(readEvent.metadata !== null, "Expected metadata fields to have been present on the event");
-
-                assert.equal(testRunDate, readEvent.metadata.toString(),
-                    "Expected metadata field 'testRanAt' to match date " + testRunDate);
-                
-                connection.close();
-                done();
-            };
+                    connection.close();
+                    done();
+                });
         });
     });
 });
+
+function readTestEvent(eventNumber, options, onEventAppeared, onCompleted) {
+    var maxCount = 1;    
+    var connection = new EventStoreClient.Connection(options);
+    connection.readStreamEventsBackward(streamId, eventNumber, maxCount, false, false, onEventAppeared, credentials, function(completed) {
+        onCompleted(connection, completed);
+    });
+}
 
 function writeMetadataTestEvent(data, metadata, options, onCompleted) {
     var events = [{
