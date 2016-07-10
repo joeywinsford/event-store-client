@@ -43,14 +43,13 @@ describe.only("Event Metadata", function() {
 
             var readEvent = null;
 
-            var fromEventNumber = 0;
             var maxCount = 1;
             var onEventAppeared = function (event) {
                 readEvent = event;
             };
 
             var connection = new EventStoreClient.Connection(createOptions(done));
-            connection.readStreamEventsBackward(streamId, fromEventNumber, maxCount, false, false, onEventAppeared, credentials, onCompleted);
+            connection.readStreamEventsBackward(streamId, testEventNumber, maxCount, false, false, onEventAppeared, credentials, onCompleted);
 
             function onCompleted(completed) {
                 assert.equal(completed.result, EventStoreClient.ReadStreamResult.Success,
