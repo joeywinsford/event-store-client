@@ -10,6 +10,8 @@ var streamId = "event-store-client-test";
 describe.only("Event Metadata", function() {
 
     var testEventNumber = null;
+    var testRunDate = new Date().toISOString();
+
     before("Writing a test event with metadata", function(done) {
 
         var events = [{
@@ -19,7 +21,7 @@ describe.only("Event Metadata", function() {
                 comment: "Testing reading and writing event metadata"
             },
             metadata: {
-                testRanAt: new Date().toISOString()
+                testRanAt: testRunDate
             }
         }];
 
@@ -56,6 +58,7 @@ describe.only("Event Metadata", function() {
 
                 assert.ok(typeof readEvent.metadata !== "undefined", "Expected event to have metadata");
 
+                assert.ok(readEvent.metadata !== null, "Expected metadata fields to have been present on the event");
                 connection.close();
                 done();
             };
