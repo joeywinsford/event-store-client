@@ -7,7 +7,7 @@ var credentials = dbconn.credentials;
 
 var streamId = "event-store-client-test";
 
-describe("Event Metadata", function() {
+describe.only("Event Metadata", function() {
 
     var testEventNumber = null;
     var testRunDate = new Date().toISOString();
@@ -65,7 +65,7 @@ describe("Event Metadata", function() {
         });
     });
 
-    describe.only("Reading binary metadata from an event", function() {
+    describe("Reading binary metadata from an event", function() {
         before("Writing a test event with metadata", function(done) {
 
             writeMetadataTestEvent(new Buffer(testRunDate), createOptions(done), onCompleted);
