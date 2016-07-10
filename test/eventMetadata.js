@@ -107,7 +107,7 @@ describe("Event Metadata", function() {
 
                 assert.ok(readEvent.metadata !== null, "Expected metadata fields to have been present on the event");
 
-                assert.equal(testRunDate, readEvent.metadata.testRanAt,
+                assert.equal(testRunDate, readEvent.metadata.toString(),
                     "Expected metadata field 'testRanAt' to match date " + testRunDate);
                 
                 connection.close();
