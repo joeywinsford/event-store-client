@@ -5,7 +5,41 @@ var dbconn = require("./common/dbconn");
 var defaultHostName = dbconn.defaultHostName;
 var credentials = dbconn.credentials;
 
-describe("Event Metadata", function() {
+describe.only("Event Metadata", function() {
+
+    var testEventNumber = null;
+    before("Writing a test event with metadata", function(done) {
+        var options = {
+                host: defaultHostName,
+                onError: done
+            };
+
+            var streamId = "event-store-client-test";
+            var expectedVersion = EventStoreClient.ExpectedVersion.Any;
+            var requireMaster = false;
+            var events = [{
+                eventId: EventStoreClient.Connection.createGuid(),
+                eventType: "MetadataTestEvent",
+                data: {
+                    comment: "Testing reading and writing event metadata"
+                },
+                metadata: {
+                    testRanAt: new Date().toISOString()
+                }
+            }];
+
+            var connection = new EventStoreClient.Connection(options);
+            connection.writeEvents(streamId, expectedVersion, requireMaster, events, credentials, function (completed) {
+                assert.equal(completed.result, EventStoreClient.OperationResult.Success,
+                    "Expected a result code of Success, not " + EventStoreClient.OperationResult.getName(completed.result) + ": " + completed.message
+                );
+
+                testEventNumber = completed.firstEventNumber;
+
+                connection.close();
+                done();
+            });
+    });
     describe("Reading metadata from an event", function() {
         it("should have metadata defined on the event", function(done) {
             var options = {
