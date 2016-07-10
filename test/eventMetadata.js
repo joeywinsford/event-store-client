@@ -24,11 +24,7 @@ describe.only("Event Metadata", function() {
             writeMetadataTestEvent(data, metadata, createOptions(done), onCompleted);
 
             function onCompleted(connection, completed) {
-                assert.equal(completed.result, EventStoreClient.OperationResult.Success,
-                    "Expected a result code of Success, not " + EventStoreClient.OperationResult.getName(completed.result) + ": " + completed.message);
-
                 testEventNumber = completed.firstEventNumber;
-
                 connection.close();
                 done();
             };
@@ -73,11 +69,7 @@ describe.only("Event Metadata", function() {
             writeMetadataTestEvent(data, metadata, createOptions(done), onCompleted);
             
             function onCompleted(connection, completed) {
-                assert.equal(completed.result, EventStoreClient.OperationResult.Success,
-                    "Expected a result code of Success, not " + EventStoreClient.OperationResult.getName(completed.result) + ": " + completed.message);
-
                 testEventNumber = completed.firstEventNumber;
-
                 connection.close();
                 done();
             };
