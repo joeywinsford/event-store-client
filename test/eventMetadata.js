@@ -5,12 +5,13 @@ var dbconn = require("./common/dbconn");
 var defaultHostName = dbconn.defaultHostName;
 var credentials = dbconn.credentials;
 
+var streamId = "event-store-client-test";
+
 describe.only("Event Metadata", function() {
 
     var testEventNumber = null;
     before("Writing a test event with metadata", function(done) {
 
-        var streamId = "event-store-client-test";
         var expectedVersion = EventStoreClient.ExpectedVersion.Any;
         var requireMaster = false;
         var events = [{
@@ -41,7 +42,6 @@ describe.only("Event Metadata", function() {
 
             var readEvent = null;
 
-            var streamId = "event-store-client-test";
             var fromEventNumber = 0;
             var maxCount = 1;
             var resolveLinkTos = false;
