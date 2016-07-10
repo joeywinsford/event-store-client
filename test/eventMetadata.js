@@ -7,7 +7,7 @@ var credentials = dbconn.credentials;
 
 var streamId = "event-store-client-test";
 
-describe.only("Event Metadata", function() {
+describe("Event Metadata", function() {
 
     describe("Reading JSON metadata from an event", function() {
 
@@ -15,17 +15,12 @@ describe.only("Event Metadata", function() {
         var testRunDate = new Date().toISOString();
 
         before("Writing a test event with metadata", function(done) {
-            var data = {
-                comment: "Testing reading and writing event metadata"
-            };
-            var metadata = {
-                testRanAt: testRunDate
-            };
+            var data = { comment: "Testing reading and writing event metadata" };
+            var metadata = { testRanAt: testRunDate };
+
             writeMetadataTestEvent(data, metadata, createOptions(done), function(connection, completed) {
                 testEventNumber = getNewEventNumber(connection, completed, done);
-            });
-
-            
+            });            
         });
         it("should have metadata defined on the event", function(done) {
             var readEvent = null;
