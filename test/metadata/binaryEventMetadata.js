@@ -14,18 +14,23 @@ describe("Binary Event Metadata", function() {
         var testRunDate = new Date().toISOString();
         
         before("Writing a test event with metadata", function(done) {
+            var events = [{
+                eventId: EventStoreClient.Connection.createGuid(),
+                eventType: "MetadataTestEvent",
+                data: new Buffer("Testing reading and writing event metadata"),
+                metadata: new Buffer(testRunDate)
+            }];
 
-            var data = new Buffer("Testing reading and writing event metadata");
-            var metadata = new Buffer(testRunDate);
-
-            writeMetadataTestEvent(data, metadata, createOptions(done), function(connection, completed) {
-                testEventNumber = getNewEventNumber(connection, completed, done);
-            });
-            
+            var connection = new EventStoreClient.Connection({ host: defaultHostName, onError: done });
+            connection.writeEvents(streamId, EventStoreClient.ExpectedVersion.Any, false, events, credentials, function(completed) {
+                testEventNumber = completed.firstEventNumber;
+                connection.close();
+                done();
+            });            
         });
         it("should have metadata defined on the event", function(done) {
             var readEvent = null;
-            
+
             readTestEvent(testEventNumber, createOptions(done), 
                 function(event) { readEvent = event; },
                 function (connection, completed) {
@@ -54,29 +59,9 @@ function readTestEvent(eventNumber, options, onEventAppeared, onCompleted) {
     });
 }
 
-function writeMetadataTestEvent(data, metadata, options, onCompleted) {
-    var events = [{
-        eventId: EventStoreClient.Connection.createGuid(),
-        eventType: "MetadataTestEvent",
-        data: data,
-        metadata: metadata
-    }];
-
-    var connection = new EventStoreClient.Connection(options);
-    connection.writeEvents(streamId, EventStoreClient.ExpectedVersion.Any, false, events, credentials, function(completed) {
-        onCompleted(connection, completed);
-    });
-}
-
 function createOptions(done) {
     return {
         host: defaultHostName,
         onError: done
     };
 }
-
-function getNewEventNumber(connection, completed, done) {
-    connection.close();
-    done();
-    return completed.firstEventNumber;
-};
