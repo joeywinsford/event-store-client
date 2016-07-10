@@ -12,8 +12,6 @@ describe.only("Event Metadata", function() {
     var testEventNumber = null;
     before("Writing a test event with metadata", function(done) {
 
-        var expectedVersion = EventStoreClient.ExpectedVersion.Any;
-        var requireMaster = false;
         var events = [{
             eventId: EventStoreClient.Connection.createGuid(),
             eventType: "MetadataTestEvent",
@@ -26,7 +24,7 @@ describe.only("Event Metadata", function() {
         }];
 
         var connection = new EventStoreClient.Connection(createOptions(done));
-        connection.writeEvents(streamId, expectedVersion, requireMaster, events, credentials, function (completed) {
+        connection.writeEvents(streamId, EventStoreClient.ExpectedVersion.Any, false, events, credentials, function (completed) {
             assert.equal(completed.result, EventStoreClient.OperationResult.Success,
                 "Expected a result code of Success, not " + EventStoreClient.OperationResult.getName(completed.result) + ": " + completed.message
                 );
@@ -44,14 +42,12 @@ describe.only("Event Metadata", function() {
 
             var fromEventNumber = 0;
             var maxCount = 1;
-            var resolveLinkTos = false;
-            var requireMaster = false;
             var onEventAppeared = function (event) {
                 readEvent = event;
             };
 
             var connection = new EventStoreClient.Connection(createOptions(done));
-            connection.readStreamEventsBackward(streamId, fromEventNumber, maxCount, resolveLinkTos, requireMaster, onEventAppeared, credentials, 
+            connection.readStreamEventsBackward(streamId, fromEventNumber, maxCount, false, false, onEventAppeared, credentials, 
                 function (completed) {
                     assert.equal(completed.result, EventStoreClient.ReadStreamResult.Success,
                         "Expected a result code of Success, not " + EventStoreClient.ReadStreamResult.getName(completed.result));
