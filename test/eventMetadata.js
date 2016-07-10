@@ -12,9 +12,8 @@ describe("Event Metadata", function() {
     var testEventNumber = null;
     var testRunDate = new Date().toISOString();
 
-    describe("JSON metadata", function() {
+    describe("Reading JSON metadata from an event", function() {
         before("Writing a test event with metadata", function(done) {
-
             var events = [{
                 eventId: EventStoreClient.Connection.createGuid(),
                 eventType: "MetadataTestEvent",
@@ -39,34 +38,30 @@ describe("Event Metadata", function() {
                 done();
             };
         });
-        describe("Reading metadata from an event", function() {
-            it("should have metadata defined on the event", function(done) {
+        it("should have metadata defined on the event", function(done) {
+            var readEvent = null;
+            var maxCount = 1;
+            var onEventAppeared = function (event) {
+                readEvent = event;
+            };
 
-                var readEvent = null;
+            var connection = new EventStoreClient.Connection(createOptions(done));
+            connection.readStreamEventsBackward(streamId, testEventNumber, maxCount, false, false, onEventAppeared, credentials, onCompleted);
 
-                var maxCount = 1;
-                var onEventAppeared = function (event) {
-                    readEvent = event;
-                };
+            function onCompleted(completed) {
+                assert.equal(completed.result, EventStoreClient.ReadStreamResult.Success,
+                    "Expected a result code of Success, not " + EventStoreClient.ReadStreamResult.getName(completed.result));
 
-                var connection = new EventStoreClient.Connection(createOptions(done));
-                connection.readStreamEventsBackward(streamId, testEventNumber, maxCount, false, false, onEventAppeared, credentials, onCompleted);
+                assert.ok(typeof readEvent.metadata !== "undefined", "Expected event to have metadata");
 
-                function onCompleted(completed) {
-                    assert.equal(completed.result, EventStoreClient.ReadStreamResult.Success,
-                        "Expected a result code of Success, not " + EventStoreClient.ReadStreamResult.getName(completed.result));
+                assert.ok(readEvent.metadata !== null, "Expected metadata fields to have been present on the event");
 
-                    assert.ok(typeof readEvent.metadata !== "undefined", "Expected event to have metadata");
-
-                    assert.ok(readEvent.metadata !== null, "Expected metadata fields to have been present on the event");
-
-                    assert.equal(testRunDate, readEvent.metadata.testRanAt,
-                        "Expected metadata field 'testRanAt' to match date " + testRunDate);
-                    
-                    connection.close();
-                    done();
-                };
-            });
+                assert.equal(testRunDate, readEvent.metadata.testRanAt,
+                    "Expected metadata field 'testRanAt' to match date " + testRunDate);
+                
+                connection.close();
+                done();
+            };
         });
     });
 });
