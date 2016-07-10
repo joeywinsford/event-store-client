@@ -7,7 +7,7 @@ var credentials = dbconn.credentials;
 
 var streamId = "event-store-client-test";
 
-describe.only("Event Metadata", function() {
+describe("Event Metadata", function() {
 
     var testEventNumber = null;
     var testRunDate = new Date().toISOString();
