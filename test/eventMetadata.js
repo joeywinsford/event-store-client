@@ -21,13 +21,11 @@ describe.only("Event Metadata", function() {
             var metadata = {
                 testRanAt: testRunDate
             };
-            writeMetadataTestEvent(data, metadata, createOptions(done), onCompleted);
+            writeMetadataTestEvent(data, metadata, createOptions(done), function(connection, completed) {
+                testEventNumber = getNewEventNumber(connection, completed, done);
+            });
 
-            function onCompleted(connection, completed) {
-                testEventNumber = completed.firstEventNumber;
-                connection.close();
-                done();
-            };
+            
         });
         it("should have metadata defined on the event", function(done) {
             var readEvent = null;
@@ -66,13 +64,10 @@ describe.only("Event Metadata", function() {
             var data = new Buffer("Testing reading and writing event metadata");
             var metadata = new Buffer(testRunDate);
 
-            writeMetadataTestEvent(data, metadata, createOptions(done), onCompleted);
+            writeMetadataTestEvent(data, metadata, createOptions(done), function(connection, completed) {
+                testEventNumber = getNewEventNumber(connection, completed, done);
+            });
             
-            function onCompleted(connection, completed) {
-                testEventNumber = completed.firstEventNumber;
-                connection.close();
-                done();
-            };
         });
         it("should have metadata defined on the event", function(done) {
             var readEvent = null;
@@ -122,3 +117,9 @@ function createOptions(done) {
         onError: done
     };
 }
+
+function getNewEventNumber(connection, completed, done) {
+    connection.close();
+    done();
+    return completed.firstEventNumber;
+};
