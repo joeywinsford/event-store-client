@@ -9,6 +9,7 @@ var streamId = "event-store-client-test";
 
 describe("Event Metadata", function() {
 
+    describe("JSON metadata", function() {
     var testEventNumber = null;
     var testRunDate = new Date().toISOString();
 
@@ -63,6 +64,7 @@ describe("Event Metadata", function() {
             };
         });
     });
+});
 });
 
 function createOptions(done) {
