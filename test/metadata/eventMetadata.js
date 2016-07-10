@@ -1,6 +1,6 @@
 var assert = require("assert");
-var EventStoreClient = require("../index.js");
-var dbconn = require("./common/dbconn");
+var EventStoreClient = require(".../index.js");
+var dbconn = require("../common/dbconn");
 
 var defaultHostName = dbconn.defaultHostName;
 var credentials = dbconn.credentials;
