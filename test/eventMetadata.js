@@ -9,26 +9,21 @@ var streamId = "event-store-client-test";
 
 describe.only("Event Metadata", function() {
 
-    var testEventNumber = null;
-    var testRunDate = new Date().toISOString();
-
     describe("Reading JSON metadata from an event", function() {
+
+        var testEventNumber = null;
+        var testRunDate = new Date().toISOString();
+
         before("Writing a test event with metadata", function(done) {
-            var events = [{
-                eventId: EventStoreClient.Connection.createGuid(),
-                eventType: "MetadataTestEvent",
-                data: {
-                    comment: "Testing reading and writing event metadata"
-                },
-                metadata: {
-                    testRanAt: testRunDate
-                }
-            }];
+            var data = {
+                comment: "Testing reading and writing event metadata"
+            };
+            var metadata = {
+                testRanAt: testRunDate
+            };
+            writeMetadataTestEvent(data, metadata, createOptions(done), onCompleted);
 
-            var connection = new EventStoreClient.Connection(createOptions(done));
-            connection.writeEvents(streamId, EventStoreClient.ExpectedVersion.Any, false, events, credentials, onCompleted);
-
-            function onCompleted(completed) {
+            function onCompleted(connection, completed) {
                 assert.equal(completed.result, EventStoreClient.OperationResult.Success,
                     "Expected a result code of Success, not " + EventStoreClient.OperationResult.getName(completed.result) + ": " + completed.message);
 
@@ -66,6 +61,10 @@ describe.only("Event Metadata", function() {
     });
 
     describe("Reading binary metadata from an event", function() {
+
+        var testEventNumber = null;
+        var testRunDate = new Date().toISOString();
+        
         before("Writing a test event with metadata", function(done) {
 
             var data = new Buffer("Testing reading and writing event metadata");
