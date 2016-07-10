@@ -67,19 +67,9 @@ describe("Event Metadata", function() {
 
     describe.only("Reading binary metadata from an event", function() {
         before("Writing a test event with metadata", function(done) {
-            var events = [{
-                eventId: EventStoreClient.Connection.createGuid(),
-                eventType: "MetadataTestEvent",
-                data: {
-                    comment: "Testing reading and writing event metadata"
-                },
-                metadata: new Buffer(testRunDate)
-            }];
 
-            var connection = new EventStoreClient.Connection(createOptions(done));
-            connection.writeEvents(streamId, EventStoreClient.ExpectedVersion.Any, false, events, credentials, onCompleted);
-
-            function onCompleted(completed) {
+            writeMetadataTestEvent(new Buffer(testRunDate), createOptions(done), onCompleted);
+            function onCompleted(connection, completed) {
                 assert.equal(completed.result, EventStoreClient.OperationResult.Success,
                     "Expected a result code of Success, not " + EventStoreClient.OperationResult.getName(completed.result) + ": " + completed.message);
 
@@ -116,6 +106,22 @@ describe("Event Metadata", function() {
         });
     });
 });
+
+function writeMetadataTestEvent(metadata, options, onCompleted) {
+    var events = [{
+        eventId: EventStoreClient.Connection.createGuid(),
+        eventType: "MetadataTestEvent",
+        data: {
+            comment: "Testing reading and writing event metadata"
+        },
+        metadata: metadata
+    }];
+
+    var connection = new EventStoreClient.Connection(options);
+    connection.writeEvents(streamId, EventStoreClient.ExpectedVersion.Any, false, events, credentials, function(completed) {
+        onCompleted(connection, completed);
+    });
+}
 
 function createOptions(done) {
     return {
