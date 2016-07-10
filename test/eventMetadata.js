@@ -111,9 +111,7 @@ function writeMetadataTestEvent(metadata, options, onCompleted) {
     var events = [{
         eventId: EventStoreClient.Connection.createGuid(),
         eventType: "MetadataTestEvent",
-        data: {
-            comment: "Testing reading and writing event metadata"
-        },
+        data: new Buffer("Testing reading and writing event metadata"),
         metadata: metadata
     }];
 
