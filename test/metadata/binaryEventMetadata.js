@@ -42,11 +42,8 @@ describe("Binary Event Metadata", function() {
                 assert.equal(completed.result, EventStoreClient.ReadStreamResult.Success,
                     "Expected a result code of Success, not " + EventStoreClient.ReadStreamResult.getName(completed.result));
 
-                assert.ok(typeof testEvent.metadata !== "undefined", 
-                    "Expected event to have metadata");
-
-                assert.ok(testEvent.metadata !== null, 
-                    "Expected metadata fields to have been present on the event");
+                assert.ok(testEvent.isJson === false, 
+                    "Expected event to have JSON data");
 
                 assert.equal(testRunDate, testEvent.metadata.toString(),
                     "Expected metadata field 'testRanAt' to match date " + testRunDate);
