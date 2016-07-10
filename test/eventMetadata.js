@@ -65,7 +65,7 @@ describe("Event Metadata", function() {
         });
     });
 
-    describe("Reading binary metadata from an event", function() {
+    describe.only("Reading binary metadata from an event", function() {
         before("Writing a test event with metadata", function(done) {
             var events = [{
                 eventId: EventStoreClient.Connection.createGuid(),
@@ -73,9 +73,7 @@ describe("Event Metadata", function() {
                 data: {
                     comment: "Testing reading and writing event metadata"
                 },
-                metadata: {
-                    testRanAt: new Buffer(testRunDate)
-                }
+                metadata: new Buffer(testRunDate)
             }];
 
             var connection = new EventStoreClient.Connection(createOptions(done));
