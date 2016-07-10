@@ -24,16 +24,17 @@ describe.only("Event Metadata", function() {
         }];
 
         var connection = new EventStoreClient.Connection(createOptions(done));
-        connection.writeEvents(streamId, EventStoreClient.ExpectedVersion.Any, false, events, credentials, function (completed) {
+        connection.writeEvents(streamId, EventStoreClient.ExpectedVersion.Any, false, events, credentials, onCompleted);
+
+        function onCompleted(completed) {
             assert.equal(completed.result, EventStoreClient.OperationResult.Success,
-                "Expected a result code of Success, not " + EventStoreClient.OperationResult.getName(completed.result) + ": " + completed.message
-                );
+                "Expected a result code of Success, not " + EventStoreClient.OperationResult.getName(completed.result) + ": " + completed.message);
 
             testEventNumber = completed.firstEventNumber;
 
             connection.close();
             done();
-        });
+        };
     });
     describe("Reading metadata from an event", function() {
         it("should have metadata defined on the event", function(done) {
@@ -47,15 +48,17 @@ describe.only("Event Metadata", function() {
             };
 
             var connection = new EventStoreClient.Connection(createOptions(done));
-            connection.readStreamEventsBackward(streamId, fromEventNumber, maxCount, false, false, onEventAppeared, credentials, 
-                function (completed) {
-                    assert.equal(completed.result, EventStoreClient.ReadStreamResult.Success,
-                        "Expected a result code of Success, not " + EventStoreClient.ReadStreamResult.getName(completed.result));
-                    assert.ok(typeof readEvent.metadata !== "undefined", "Expected event to have metadata");
+            connection.readStreamEventsBackward(streamId, fromEventNumber, maxCount, false, false, onEventAppeared, credentials, onCompleted);
 
-                    connection.close();
-                    done();
-                });
+            function onCompleted(completed) {
+                assert.equal(completed.result, EventStoreClient.ReadStreamResult.Success,
+                    "Expected a result code of Success, not " + EventStoreClient.ReadStreamResult.getName(completed.result));
+
+                assert.ok(typeof readEvent.metadata !== "undefined", "Expected event to have metadata");
+
+                connection.close();
+                done();
+            };
         });
     });
 });
